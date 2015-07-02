@@ -1,0 +1,2 @@
+http://www.cnblogs.com/leefreeman/p/4564886.html
+我们刚才说的iphone6，书面称谓叫“SPU” Standard Product Unit （标准化产品单元），它是最接近用户认知的产品单元，比如用户说，我想买个iphone4、iphone6、小米4，这些都是SPU，也就是用户普遍认知范围内的一种产品。然而在电商系统中只有SPU并没有什么卵用，用户购买时肯定要确定，需要什么颜色、多少G的，支持什么网络。所以，例如金色-16G-移动版 iphone6，就需要一个名称去规范它，这个名称叫“SKU” Stock Keeping Unit(库存单元)，换句话理解就是库存里面存的东西，库存里存在东西肯定是具体的某种规格的iphone6。
