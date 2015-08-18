@@ -1,0 +1,21 @@
+http://www.travisup.com/post/index/28
+
+JSONP原理及简单实现
+
+
+ 在web2.0时代，熟练的使用ajax是每个前端攻城师必备的技能。然而由于受到浏览器的限制，ajax不允许跨域通信。 
+
+JSONP就是就是目前主流的实现跨域通信的解决方案。 
+
+虽然在在jquery中，我们可以通过$.ajax的dataType设置为jsonp来调用jsonp，但是jsonp和ajax的实现原理一个关系都木有。jsonp主要是通过script可以链接远程url来实现跨域请求的。如：
+ 1.<script src="http://jsonp.js?callback=xxx"></script> 
+callback定义了一个函数名，而远程服务端通过调用指定的函数并传入参数来实现传递参数。 
+
+搜索了网上好多文章，他们实现方法都过于简单，要实际应用还要多加修改，我在这里封装了一个对象，可以直接运用于实际操作。 
+1.var JSONP = {2.    // 获取当前时间戳3.    now: function() {4.        return (new Date()).getTime();5.    },6.    7.    // 获取16位随机数8.    rand: function() {9.        return Math.random().toString().substr(2);10.    },11.    12.    // 删除节点元素13.    removeElem: function(elem) {14.        var parent = elem.parentNode;15.        if(parent && parent.nodeType !== 11) {16.            parent.removeChild(elem);17.        }18.    },19.    20.    // url组装21.    parseData: function(data) {22.        var ret = "";23.        if(typeof data === "string") {24.            ret = data;25.        }26.        else if(typeof data === "object") {27.            for(var key in data) {28.                ret += "&" + key + "=" + encodeURIComponent(data[key]);29.            }30.        }31.        // 加个时间戳，防止缓存32.        ret += "&_time=" + this.now();33.        ret = ret.substr(1);34.        return ret;35.    },36.    37.    getJSON: function(url, data, func) {38.        // 函数名称39.        var name;40.        41.        // 拼装url42.        url = url + (url.indexOf("?") === -1 ? "?" : "&") + this.parseData(data);43.        44.        // 检测callback的函数名是否已经定义45.        var match = /callback=(\w+)/.exec(url);46.        if(match && match[1]) {47.            name = match[1];48.        } else {49.            // 如果未定义函数名的话随机成一个函数名50.            // 随机生成的函数名通过时间戳拼16位随机数的方式，重名的概率基本为051.            // 如:jsonp_1355750852040_826073207659646952.            name = "jsonp_" + this.now() + '_' + this.rand();53.            // 把callback中的?替换成函数名54.            url = url.replace("callback=?", "callback="+name);55.            // 处理?被encode的情况56.            url = url.replace("callback=%3F", "callback="+name);57.        }58.        59.        // 创建一个script元素60.        var script = document.createElement("script");61.        script.type = "text/javascript";62.        // 设置要远程的url63.        script.src = url;64.        // 设置id，为了后面可以删除这个元素65.        script.id = "id_" + name;66.        67.        // 把传进来的函数重新组装，并把它设置为全局函数，远程就是调用这个函数68.        window[name] = function(json) {69.            // 执行这个函数后，要销毁这个函数70.            window[name] = undefined;71.            // 获取这个script的元素72.            var elem = document.getElementById("id_" + name);73.            // 删除head里面插入的script，这三步都是为了不影响污染整个DOM啊74.            JSONP.removeElem(elem);75.            // 执行传入的的函数76.            func(json);77.        };78.        79.        // 在head里面插入script元素80.        var head = document.getElementsByTagName("head");81.        if(head && head[0]) {82.            head[0].appendChild(script);83.        }84.    }85.}; 
+实现过程基本写在注释里啦，自己看。调用的方法跟jQuery基本一样。如： 
+1.var data = {2.            from: "北京",3.            count: 27,4.            output: "json",5.            callback: "?"6.        }7.JSONP.getJSON("http://api.qunar.com/cdnWebservices.jcp", data, function(json) {console.log(json)}); 
+当然要这么写也行： 
+1.JSONP.getJSON("http://api.qunar.com/cdnWebservices.jcp?from=北京&count=27&output=json&callback=?", null, function(json) {console.log(json)}); 
+至于服务端的实现，那就比较简单了，以php为例： 
+1.$callback = !empty($_GET['callback']) ? $_GET['callback'] : 'callback';2.echo $callback.'( .json_encode( $data ).')';
