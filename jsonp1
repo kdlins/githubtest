@@ -19,3 +19,5 @@ callback定义了一个函数名，而远程服务端通过调用指定的函数
 1.JSONP.getJSON("http://api.qunar.com/cdnWebservices.jcp?from=北京&count=27&output=json&callback=?", null, function(json) {console.log(json)}); 
 至于服务端的实现，那就比较简单了，以php为例： 
 1.$callback = !empty($_GET['callback']) ? $_GET['callback'] : 'callback';2.echo $callback.'( .json_encode( $data ).')';
+
+在getJSON函数里，第48行之后，如果没有定义callback函数的情况下，不应该是替换吧，url里没有callback无法替换。应该是在url里添加callback吧。像这样 url += '&callback=' + name;
