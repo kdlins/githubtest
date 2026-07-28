@@ -1,0 +1,1 @@
+Nothing needs to be added to .gitignore since only a Python source file (heidisql_app.py) was added, which is not a build artifact, dependency, or temporary file.
